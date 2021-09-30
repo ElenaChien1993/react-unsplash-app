@@ -443,6 +443,5 @@
   [表單 - React](https://zh-hant.reactjs.org/docs/forms.html)
   
   在 HTML 中，表單的 element 像是 <input>、<textarea> 和 <select> 通常會維持它們自身的 state，並根據使用者的輸入來更新 state。
-  
-  在 React 中，可變的 state 通常是被維持在 component 中的 state property，並只能以 `setState()` 來更新，
-  所以如果有將使用者的輸入跟 component 的 state 結合，React component 同時有掌握到後續使用者的輸入對表單帶來的改變，就被稱為「controlled component」。
+    
+    在 React 中，可變的 state 通常是被維持在 component 中的 state property，並只能以 `setState()` 來更新，所以如果有將使用者的輸入跟 component 的 state 結合，React component 同時有掌握到後續使用者的輸入對表單帶來的改變，就被稱為「controlled component」。
