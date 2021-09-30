@@ -441,3 +441,205 @@
 什麼是 Controlled Component？跟 Uncontrolled 又有什麼差別？  
 
 [表單 - React](https://zh-hant.reactjs.org/docs/forms.html)
+
+在 HTML 中，表單的 element 像是 input、textarea 和 select 通常會維持它們自身的 state，並根據使用者的輸入來更新 state。
+
+在 React 中，可變的 state 通常是被維持在 component 中的 state property，並只能以 `setState()` 來更新，
+所以如果有將使用者的輸入跟 component 的 state 結合，React component 同時有掌握到後續使用者的輸入對表單帶來的改變，就被稱為「controlled component」。
+
+❓ 要怎麼變成 Controlled Component？
+
+設定一個 value state 給 component，並用一個 fn 監聽 `onchange`，
+讓每一次輸入都用 `setState()` 更新那個 value state，然後把 state 的值指定給這個 element 的 value props
+
+```jsx
+class SearchBar extends React.Component {
+  state = { value: '' };
+
+  onInputChange(e) {
+    this.setState({ value: e.target.value });
+  }
+  
+  render() {
+    return (
+      <div className="ui segment">
+        <form className="ui form">
+          <div className="field">
+            <label>Image Search</label>
+            <input 
+              type="search" 
+              placeholder="type to search"
+              value={ this.state.value } 
+              onchange={ this.onInputChange } 
+            />
+          </div>
+        </form>
+      </div>
+    )
+  }
+}
+```
+
+雖然這樣會多寫 code，但重點是希望把 data 或 info 存在 react component 中，
+而不是存在 HTML DOM 中！
+
+### 2. axios 發送 HTTP request
+
+[React系列十三 - axios庫的使用_coderwhy - MdEditor](https://www.gushiciku.cn/pl/pZwZ/zh-tw)
+
+axios 有多種請求方式，現在先以此次有遇到的為主來筆記
+
+1. `axios(config 物件)`
+
+    ```jsx
+    axios({
+    	method: "get",
+      url: "https:httpbin.org/get",
+      params: {
+    		name: "coderwhy",
+        age: 18
+      }
+      })
+    	.then(res => { console.log("請求結果:", res); })
+    	.catch(err => { console.log("錯誤資訊:", err); });
+    ```
+
+2. 直接指定 `axios.get(url , config 物件)`
+
+    這邊一樣先介紹這次有使用到的 config 物件屬性：
+
+    - params：是指加在 url 後面的參數
+    - headers：要傳送的自定義 headers？不太懂，
+    但像是 Unsplash 的個人 API key 可以放在這邊，就不用在 url 後面加參數
+
+    ```jsx
+    onSearchSubmit = value => {
+      axios.get('https://api.unsplash.com/search/photos', {
+        params: { query: value },
+        headers: { Authorization: 'Client-ID fv2cTWNJs5qN8K0HG6cuT7nn9M4rTLi4XlehR3noS70' }
+      });
+    }
+    ```
+
+3. 改用 `axios.create()` 直接建立一個通用的 instance，好處有：
+    1. 統一套用 Config
+    2. 統一管理 API，日後修改容易（分開檔案、Import ）
+    3. 減少 URL 冗長更易讀（ baseURL 運用）
+
+### 3. CSS grid 複習
+
+[https://www.notion.so/0617-Udemy-CSS-741e8dddeffb41948646cc5faa49c533#247cf0cd02864c59ba89eb4fa92f0b8e](https://www.notion.so/0617-Udemy-CSS-741e8dddeffb41948646cc5faa49c533)
+
+RWD 排版組合技：repeat() & auto-fill/fit & minmax()
+
+```css
+grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+/* 當畫面最小抵達 200px 的時候，就都使用 1fr 呈現 */
+```
+
+### 4. React Refs
+
+[Refs 和 DOM - React](https://zh-hant.reactjs.org/docs/refs-and-the-dom.html)
+
+- Give access to a single DOM element
+- Create refs in the constructor, assign them to instance variables, then pass to a particular JSX element as props
+
+什麼時候該使用 Ref？
+
+有幾種適合使用 ref 的情況：
+
+- 管理 focus、選擇文字、或影音播放
+- 觸發即時的動畫
+- 與第三方 DOM 函式庫整合
+
+建立 Ref
+
+Ref 是藉由使用 `React.createRef()` 所產生的
+
+Ref 常常會在一個 component 被建立出來的時候，被賦值在某個 instance 屬性，
+這樣一來他們就可以在整個 component 裡面被參考
+
+```jsx
+constructor(props) {
+  super(props);
+
+  this.imageRef = React.createRef();
+}
+
+render() {
+  const { alt_description, urls } = this.props.image;
+
+  return (
+    <div>
+      <img 
+        ref={ this.imageRef }
+        alt={ alt_description} 
+        src={ urls.regular }
+      />
+    </div>
+	)
+}
+```
+
+存取 Ref
+
+當 ref 在 `render` 裡被傳到一個 element 的時候，
+一個指向節點對 ref 的 `current` 參數的參考會變得可以取得。
+
+Ref 的值會根據節點的類型而有所不同：
+
+- 當在 HTML element 上使用 `ref` 參數時，使用 `React.createRef()` 建立 `ref` 會取得它底下的 DOM element 來做為它的 `current` 屬性
+- 當在客製化的 class component 使用 `ref` 參數時，`ref` 取得被 mount 的 component 上的 instance 來當作他的 `current`
+- **你不能在 function component 上使用 `ref`**，因為他們沒有 instance
+
+React 會在 component mount 的時候將 DOM element 賦值到 `current` 屬性，
+並在 unmount 時將它清空回 `null`。
+
+ref 的更新發生在生命週期 `componentDidMount` 或 `componentDidUpdate` 之前。
+
+```jsx
+componentDidMount() {
+  console.log(this.imageRef);
+}
+```
+
+在 console 中會出現一個有 current 屬性的物件，value 是 img 這個 DOM 節點
+
+要取得 img 的 height，很直接預想是如下：
+
+```jsx
+componentDidMount() {
+  console.log(this.imageRef.current.clientHeight);
+}
+```
+
+但結果會出現 0！為什麼呢？
+
+先用以下程式碼測試結果
+
+```jsx
+componentDidMount() {
+	console.log(this.imageRef);
+  console.log(this.imageRef.current.clientHeight);
+}
+```
+
+結果是明明在 console 展開 `this.imageRef` 裡面是可以找到 `clientHeight`，
+但第二行程式碼在 console 中印出 0！
+
+因為其實在我們 console log 的時候，圖片還沒被 load，
+所以對瀏覽器來說我們執行 console log 的時候其實是沒有圖片的
+
+為了修正這個錯誤，當然是要確定我們 load 完圖片再執行，
+所以這邊用 evnet listener 監聽 load 事件，再指定一個 callback fn 給他，
+記得用 arrow fn
+
+```jsx
+componentDidMount() {
+  this.imageRef.current.addEventListener('load', this.setSpans);
+}
+
+setSpans = () => {
+  console.log(this.imageRef.current.clientHeight);
+}
+```
